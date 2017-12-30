@@ -193,7 +193,7 @@ SET character_set_client = @saved_cs_client;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `addStockToFolio`( folioId INT, 
+CREATE PROCEDURE `addStockToFolio`( folioId INT, 
 stockId varchar(20), stockPrice decimal(5,2), stockQty INT  )
 BEGIN
 
@@ -235,7 +235,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getFolio`( userId INT )
+CREATE PROCEDURE `getFolio`( userId INT )
 BEGIN  
 
 SELECT f.folio_id, f.folio_desc, f.folio_created_date, 
@@ -270,7 +270,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getFolioStocksByTime`(folioId INT)
+CREATE PROCEDURE `getFolioStocksByTime`(folioId INT)
 BEGIN
 
   DECLARE stock_list TEXT;
@@ -299,7 +299,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = '' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getStockByTime`(stockIdList TEXT, periodicty TEXT)
+CREATE PROCEDURE `getStockByTime`(stockIdList TEXT, periodicty TEXT)
 BEGIN
 
   IF periodicty = 'MONTH' THEN

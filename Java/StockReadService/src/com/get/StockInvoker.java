@@ -21,10 +21,14 @@ public class StockInvoker {
 	static final Logger LOG = LoggerFactory.getLogger(StockInvoker.class);
 
 	ArrayList<String> stocks;
-	Integer symbolperthread = 20;
+	Integer symbolperthread = 40;
 	public Connection con;
+	
+	public static void main(String[] args) {
+		String runReturn = invoke();
+	}
 
-	public String invoke() {
+	public static String invoke() {
 		
 		String logFileFormat;
 		
@@ -38,6 +42,7 @@ public class StockInvoker {
 		
 		try {
 			// Call Method To Invoke Processing
+			si.GetStockCountFromDB();
 			si.GetStockListFromDB("null");
 			si.IterateBatchRows(logFileFormat);
 		} catch (Exception e) {
@@ -49,7 +54,7 @@ public class StockInvoker {
 		return logFileFormat;
 	}
 
-	public void IterateBatchRows (String logFileFormat) throws InterruptedException {
+	public void IterateBatchRows (String logFileFormat) throws InterruptedException, SQLException {
 
 		Integer innerLoopMax = 0;
 		Integer rowCount = 0;
@@ -98,9 +103,11 @@ public class StockInvoker {
      executor.shutdown();    
      if (executor.awaitTermination(60, TimeUnit.SECONDS)) {
     	  LOG.info("All Threads Completed");
+    	  this.con.close();
     	} else {
     	  LOG.warn("Forcing shutdown Timeout:60");
     	  executor.shutdownNow();
+    	  this.con.close();
     	}   
          
 	} // IterateBatchRows
@@ -112,8 +119,9 @@ public class StockInvoker {
 		// Get Stocks Which do not have a Entry on rundate.
 		// Rundates need to tie in with market close times by Exc.
 		String query = "SELECT stock_id " + "FROM hokus.stock s " + " WHERE NOT EXISTS (   "
-				+ "			SELECT 1 FROM hokus.stock_detail sd " + "			WHERE sd.stock_id = s.stock_id "
-				+ " 			AND DATE(sd.stock_date) = DATE(sysdate()) )";
+				+ "			SELECT 1 FROM hokus.stock_detail sd " 
+				+ "			WHERE sd.stock_id = s.stock_id "
+				+ " 			AND DATE(sd.stock_date) = DATE(sysdate()) ) ";
 		System.out.print(query);
 
 		try {
@@ -125,12 +133,33 @@ public class StockInvoker {
 				stocks.add("'" + rs.getString(1) + "'");
 
 			}
-			// this.con.close();
+			this.con.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.stocks = stocks;
+	}
+	
+	public void GetStockCountFromDB() {
+
+		String query = "SELECT COUNT(1) AS total FROM hokus.stock_detail " 
+				+ " 	WHERE DATE(stock_date) = DATE(sysdate()) ";
+		
+		try {
+			this.con = SqlMySQLConn.getConnection();
+			this.con.setAutoCommit(false);
+			Statement stmt = this.con.createStatement();
+			ResultSet rs = stmt.executeQuery(query);
+			while (rs.next()) {
+				LOG.warn("Records Loaded For Date : " + rs.getInt("total"));
+			}			
+			this.con.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		
 	}
 
 }

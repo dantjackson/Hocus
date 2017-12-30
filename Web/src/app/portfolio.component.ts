@@ -63,21 +63,27 @@ export class PortfolioComponent implements OnInit{
      var titleArr : string[] = [];
      var iter : number = 0;
 
+     //console.log(jsonAsArray);
+     //console.log(this.perf);
+
      // Get distinct list of Dates
      for (let i of jsonAsArray) {
+       
+       var headers = (<any>Object).keys(i);
        var danvar = (<any>Object).values(i);
-       iter = 0;
+       iter = -1;
        for (let dateStrIter of danvar) {
          iter ++;
          var dateStrDay = +dateStrIter.toString().substring(0,2);
          var dateStrMonth = +dateStrIter.toString().substring(3,5) - 1;
          var dateStrYear = +dateStrIter.toString().substring(6,8) + 2000;
+         
          var dateVar = new Date(dateStrYear, dateStrMonth, dateStrDay);
 
          // Cannot compare date objects so use this map approach. 
          var idx = distDatesArr.map(Number).indexOf(+dateVar); 
 
-         if (idx == -1 && iter==1) {
+         if (idx == -1 && headers[iter]=="stockDate") {
           distDatesArr.push(dateVar);
          }
        }  
@@ -100,10 +106,11 @@ export class PortfolioComponent implements OnInit{
      titleArr.push("Date");
      for (let i of jsonAsArray) {
        var danvar = (<any>Object).values(i);
-       iter = 0;
+       var headers = (<any>Object).keys(i);
+       iter = -1;
        for (let z of danvar) {
          iter ++;
-         if (titleArr.indexOf(z.toString()) == -1 && iter==3) {
+         if (titleArr.indexOf(z.toString()) == -1 && headers[iter]=="stockId") {
           titleArr.push(z.toString());
          }
        }  
@@ -122,14 +129,17 @@ export class PortfolioComponent implements OnInit{
             
             for (let topArrayObj of jsonAsArray) {
               var topArr = (<any>Object).values(topArrayObj);
+              var jsonDate = topArrayObj["stockDate"];
+              var jsonTitle = topArrayObj["stockId"];
+              var jsonBid= topArrayObj["stockBid"];
 
               var dateAsFormattedStr = this.getDay(dateIter) + '-' + this.getMonth(dateIter) +  '-' + dateIter.getFullYear().toString().substr(2,4);
               //console.log('DATE'+dateIter); 
               //console.log('DATEFORM'+dateAsFormattedStr); 
               //console.log('DATEINARRAY'+topArr[0].toString()); 
 
-               if (topArr[0].toString()==dateAsFormattedStr && topArr[2].toString()==titleIter.toString()  ) {
-                 rowArrayVar.push(topArr[1]);  
+               if (jsonDate.toString()==dateAsFormattedStr && jsonTitle.toString()==titleIter.toString()  ) {
+                 rowArrayVar.push(jsonBid);  
                  subinZeroVal = false;
                  //console.log("Here");
               } 

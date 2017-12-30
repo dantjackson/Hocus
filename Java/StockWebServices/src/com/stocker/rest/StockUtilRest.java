@@ -7,7 +7,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.stocker.rest.DataClasses.Stocks;
 import com.stocker.rest.DataClasses.User;
 import com.stocker.rest.DataClasses.UtilLoadLog;
 // Defined as a project Dependency in Java build path.
@@ -32,7 +31,7 @@ public class StockUtilRest {
 		HashMap hashmapLogFile;
 	
 		StockInvoker stockinvoker = new StockInvoker();
-		fileName = stockinvoker.invoke();
+		fileName = StockInvoker.invoke();
 		stockinvoker = null;
 		
 		hashmapLogFile = StockUtilLoad.utilProcessLogFile(fileName);

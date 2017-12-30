@@ -96,25 +96,34 @@ public class StockWorkerThread implements Runnable {
 
 		Map<String, String> quoteshash = null;
 		boolean singlequotebool;
+		JSONObject results = null;
 
 		// GetList Of Stocks
 		List<String> StockList = this.symbols;
 		String EscapedStockList = String.join(",", StockList);
 		EscapedStockList = URLEncoder.encode(EscapedStockList, "UTF-8");
-		//LOG.info(EscapedStockList);
+		LOG.info(EscapedStockList);
 
 		String StringURL = "https://query.yahooapis.com/v1/public/yql?q="
 				+ "select%20*%20from%20yahoo.finance.quotes%20where%20symbol%20in%20(" + EscapedStockList
 				+ ")&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
-		//LOG.info(StringURL);
+		LOG.info(StringURL);
 
 		JSONObject json = readJsonFromUrl(StringURL);
-		//LOG.info("JSON returned:" + json.toString());
-
-		// Recurse the JSON object to the results JSON object
-		JSONObject query = json.getJSONObject("query");
-		JSONObject results = query.getJSONObject("results");
-
+		LOG.info("JSON returned:" + json.toString());
+	
+		results = getResultsAsJson(json);
+		
+		// If no results re-try
+		if (results==null) {
+			 json = readJsonFromUrl(StringURL);
+			 results = getResultsAsJson(json);
+			 if (results==null) {
+				 LOG.info("No JSON results returned:" + StockList);
+				 return;
+			 }
+		}
+		    
 		// Count Number of keys in results to determine getJSON or JSON Array.
 		// If only single symbol returned you to do not get a JSON array.
 		try {
@@ -151,6 +160,27 @@ public class StockWorkerThread implements Runnable {
 		}
 	} // Sub
 
+	public static JSONObject getResultsAsJson(JSONObject json)  {
+		JSONObject query = null, results = null;
+		
+		// Return results element, if it has quotes data
+		if (json.has("query")) {
+			query = json.getJSONObject("query");
+			if (query.has("results") ) {
+				try {
+					results = query.getJSONObject("results");
+				}
+				catch (Exception e) {
+					return null;
+				}
+				if (results.has("quote")) {
+					return results;
+				}
+			}	
+		}
+		return null;
+	}
+	
 	public static Map<String, String> ProcessQuoteData(JSONObject json) {
 
 		HashMap<String, String> out = new HashMap<String, String>();
@@ -254,7 +284,7 @@ public class StockWorkerThread implements Runnable {
 				+ "	DaysRange, MarketCapitalization, EBITDA, PriceBook, PriceSales, "
 				+ "	LastTradePriceOnly, Open  ) "
 				+ " VALUES ( ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-		java.sql.PreparedStatement pstmt;
+		java.sql.PreparedStatement pstmt = null;
 
 		//LOG.info(InsrtSql);
 
@@ -305,6 +335,7 @@ public class StockWorkerThread implements Runnable {
 			throw sqle;
 		} finally {
 			wrtCon.commit();
+			pstmt.close();
 		}
 	}
 

@@ -15,7 +15,8 @@ public class SqlMySQLConn {
 			
 			System.out.println("C1");	
 			Class.forName("com.mysql.jdbc.Driver");  
-			url = "jdbc:mysql://stocksrv.local:3306/hokus";
+			//url = "jdbc:mysql://stocksrv.local:3306/hokus";
+			url = "jdbc:mysql://35.187.46.77:3306/hokus";
 			username = "root";
 			password = "welcome1";
 			System.out.println("C2");

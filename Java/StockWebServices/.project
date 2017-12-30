@@ -3,6 +3,7 @@
 	<name>Stocker</name>
 	<comment></comment>
 	<projects>
+		<project>StockReadService</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
