@@ -16,7 +16,6 @@ import com.stocker.rest.DataClasses.User;
 
 import java.sql.*;
 
-@SuppressWarnings("restriction")
 public class UserDAO {
 	
 	private Random random = new SecureRandom();
